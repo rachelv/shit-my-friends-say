@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shit My Friends Say</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-cyan-50 text-cyan-900 min-h-screen">
+    <main class="max-w-2xl mx-auto px-6 py-10">
+      <h1 class="text-3xl font-semibold tracking-tight mb-6">Shit My Friends Say</h1>
+
+      <div class="relative mb-4">
+        <input
+          id="search"
+          type="text"
+          placeholder="Search quotes…"
+          autocomplete="off"
+          class="w-full rounded-lg border border-cyan-300 bg-white px-4 py-2 pr-10 shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-400"
+        />
+        <button
+          id="clear-search"
+          type="button"
+          aria-label="Clear search"
+          class="hidden absolute inset-y-0 right-0 px-3 text-cyan-500 hover:text-cyan-900"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div id="people" class="mb-4 flex flex-wrap gap-2"></div>
+
+      <div
+        id="person-banner"
+        class="hidden mb-4 flex items-center justify-between rounded-lg bg-cyan-200 px-4 py-2 text-sm"
+      >
+        <span>
+          Showing all quotes from <span id="person-banner-name" class="font-semibold"></span>
+        </span>
+        <button
+          id="clear-person"
+          class="font-medium text-cyan-700 hover:text-cyan-900 underline underline-offset-2"
+        >
+          show everyone
+        </button>
+      </div>
+
+      <ul id="quotes" class="space-y-4"></ul>
+
+      <p id="empty" class="hidden text-cyan-500 italic mt-6">No quotes match.</p>
+    </main>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
