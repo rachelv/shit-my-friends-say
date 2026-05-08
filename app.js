@@ -1,4 +1,4 @@
-let quotes = [];
+let entries = [];
 let searchTerm = "";
 let personFilter = null;
 
@@ -39,16 +39,19 @@ function setPersonFilter(name) {
   render();
 }
 
+function entryMatches(entry, term) {
+  const personMatch =
+    !personFilter || entry.some((q) => q.person === personFilter);
+  if (!personMatch) return false;
+  if (!term) return true;
+  return entry.some((q) =>
+    `${q.text} ${q.note || ""}`.toLowerCase().includes(term),
+  );
+}
+
 function render() {
   const term = searchTerm.trim().toLowerCase();
-  const filtered = quotes.filter((q) => {
-    if (personFilter && q.person !== personFilter) return false;
-    if (term) {
-      const haystack = `${q.text} ${q.note || ""}`.toLowerCase();
-      if (!haystack.includes(term)) return false;
-    }
-    return true;
-  });
+  const filtered = entries.filter((entry) => entryMatches(entry, term));
 
   if (personFilter) {
     bannerEl.classList.remove("hidden");
@@ -62,38 +65,44 @@ function render() {
   }
 
   listEl.innerHTML = "";
-  for (const q of filtered) {
+  for (const entry of filtered) {
     const li = document.createElement("li");
     li.className =
-      "rounded-lg bg-white border border-cyan-200 px-5 py-4 shadow-sm";
+      "rounded-lg bg-white border border-cyan-200 px-5 py-4 shadow-sm space-y-3";
 
-    const text = document.createElement("p");
-    text.className = "text-lg leading-relaxed";
-    text.textContent = `“${q.text}”`;
+    for (const q of entry) {
+      const block = document.createElement("div");
 
-    const attribution = document.createElement("p");
-    attribution.className = "mt-2 text-sm text-cyan-500";
+      const text = document.createElement("p");
+      text.className = "text-lg leading-relaxed";
+      text.textContent = `“${q.text}”`;
 
-    const dash = document.createTextNode("— ");
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = q.person;
-    btn.className =
-      "font-medium text-cyan-700 hover:text-cyan-900 underline underline-offset-2";
-    btn.addEventListener("click", () => setPersonFilter(q.person));
+      const attribution = document.createElement("p");
+      attribution.className = "mt-2 text-sm text-cyan-500";
 
-    attribution.appendChild(dash);
-    attribution.appendChild(btn);
+      const dash = document.createTextNode("— ");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = q.person;
+      btn.className =
+        "font-medium text-cyan-700 hover:text-cyan-900 underline underline-offset-2";
+      btn.addEventListener("click", () => setPersonFilter(q.person));
 
-    if (q.note) {
-      const note = document.createElement("span");
-      note.className = "text-cyan-600";
-      note.textContent = `, ${q.note}`;
-      attribution.appendChild(note);
+      attribution.appendChild(dash);
+      attribution.appendChild(btn);
+
+      if (q.note) {
+        const note = document.createElement("span");
+        note.className = "text-cyan-600";
+        note.textContent = `, ${q.note}`;
+        attribution.appendChild(note);
+      }
+
+      block.appendChild(text);
+      block.appendChild(attribution);
+      li.appendChild(block);
     }
 
-    li.appendChild(text);
-    li.appendChild(attribution);
     listEl.appendChild(li);
   }
 
@@ -126,9 +135,9 @@ window.addEventListener("hashchange", () => {
 });
 
 function renderPeople() {
-  const names = [...new Set(quotes.map((q) => q.person))].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  const names = [
+    ...new Set(entries.flatMap((entry) => entry.map((q) => q.person))),
+  ].sort((a, b) => a.localeCompare(b));
   peopleEl.innerHTML = "";
   for (const name of names) {
     const btn = document.createElement("button");
@@ -143,10 +152,10 @@ function renderPeople() {
 
 async function init() {
   const res = await fetch("quotes.json");
-  quotes = await res.json();
-  for (let i = quotes.length - 1; i > 0; i--) {
+  entries = await res.json();
+  for (let i = entries.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [quotes[i], quotes[j]] = [quotes[j], quotes[i]];
+    [entries[i], entries[j]] = [entries[j], entries[i]];
   }
   const { person, q } = readHash();
   personFilter = person;
