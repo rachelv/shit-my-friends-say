@@ -1,3 +1,6 @@
+// Paste your deployed Apps Script Web App /exec URL here.
+const ENDPOINT = "https://script.google.com/macros/s/AKfycbxdfkqNZTH3zk_QCG9JnPT3NYwds2mbEF7CrhvzwkjTIqAKZeo1FzqA9PSAoJSIrdFHjw/exec";
+
 let entries = [];
 let searchTerm = "";
 let personFilter = null;
@@ -150,9 +153,23 @@ function renderPeople() {
   }
 }
 
-async function init() {
+async function loadEntries() {
+  const live = ENDPOINT && !ENDPOINT.startsWith("PASTE_");
+  if (live) {
+    try {
+      const res = await fetch(ENDPOINT);
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      console.warn("Live fetch failed, falling back to quotes.json", err);
+    }
+  }
   const res = await fetch("quotes.json");
-  entries = await res.json();
+  return res.json();
+}
+
+async function init() {
+  entries = await loadEntries();
   for (let i = entries.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [entries[i], entries[j]] = [entries[j], entries[i]];
